@@ -29,4 +29,3 @@ predicaoCTree  = predict(cTreeENEM, testeENEM) # criar predição
 
 postResample(testeENEM[ , 4], predicaoForest) # teste de performance da Floresta Aleatória
 postResample(testeENEM[ , 4], predicaoCTree) # teste de performance da Árvore Condicional
-
