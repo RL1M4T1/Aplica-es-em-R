@@ -2,7 +2,7 @@
 pacman::p_load(car, caret, corrplot, data.table, dplyr, forcats, funModeling, mltools, randomForest, tidyverse)
 
 # carregar a base de dados
-BASE_swiss  <-  swiss  #read.csv2('https://raw.githubusercontent.com/hugoavmedeiros/etl_com_r/master/bases_tratadas/ENEM_ESCOLA_2019.csv', stringsAsFactors = T) # carregando a base já tratada para o ambiente do R
+BASE_swiss  <-  swiss  
 
 # AED 
 status(BASE_swiss) # explorar a qualidade das variáveis
@@ -10,7 +10,6 @@ freq(BASE_swiss) # explorar os fatores
 plot_num(BASE_swiss) # exploração das variáveis numéricas
 profiling_num(BASE_swiss) # estatísticas das variáveis numéricas
 
-#corrplot(cor(treinoENEM[ , c(4:12)])) # correlação entre as variáveis
 
 # Treino e Teste: Pré-processamento
 particaoBASE_swiss = createDataPartition(1:nrow(BASE_swiss), p=.7) # cria a partição 70-30

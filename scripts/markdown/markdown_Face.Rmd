@@ -1,0 +1,113 @@
+---
+  title: "Facebook"
+  output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+# carregar as bibliotecas
+pacman::p_load(cluster, ggplot2)
+pacman::p_load(car, caret, corrplot, data.table, dplyr, forcats, funModeling, mltools, randomForest, tidyverse)
+
+# pré-processamento
+# carregar a base de dados
+
+face   <- read.csv2('https://raw.githubusercontent.com/hugoavmedeiros/cd_com_r/master/bases_tratadas/facebook_2021.csv', stringsAsFactors = T)  [ , 4 : 12]
+
+# Agrupamento com kmeans
+cls <- kmeans(x = face, centers = 4) # aprendizagem ns
+face$cluster <- as.factor(cls$cluster) # passamos os clusters para a base original
+head(face)
+
+# setar semente aleatória
+set.seed(1)
+
+#str(face)
+
+
+faceRF <- read.csv2('https://raw.githubusercontent.com/hugoavmedeiros/cd_com_r/master/bases_tratadas/facebook_2021.csv', stringsAsFactors = T)
+
+# Treino e Teste: Pré-processamento da segunda base para RF
+particaoBASE_face = createDataPartition(1:nrow(faceRF), p=.7) # cria a partição 70-30
+treinoBASE_face = faceRF[particaoBASE_face$Resample1, ] # treino
+testeBASE_face  = faceRF[-particaoBASE_face$Resample1, ] # - treino = teste
+
+#str(faceRF)
+
+```
+
+# Análise dos dados do facebook
+
+## AED
+
+Abaixo, você encontra o agrupamento da base de dados Facebook, usando a técnica de k-means.
+
+```{r Face }
+
+#para suprimir , echo=FALSE, warning=FALSE
+# AED para randomForest
+
+#status(faceRF) # explorar a qualidade das variáveis
+#freq(faceRF) # explorar os fatores
+plot_num(faceRF) # exploração das variáveis numéricas
+#profiling_num(faceRF) # estatísticas das variáveis numéricas
+
+```
+
+## Modelo Preditivo (RF)
+
+```{r Face_RF}
+
+BASE_face_RF = randomForest(treinoBASE_face[ , c(4,5,6,7,8,9,10,11,12)], treinoBASE_face[ ,2], ntree = 100, keep.forest=T, keep.inbag = TRUE, importance=T) # floresta aleatória
+
+plot(BASE_face_RF)
+
+varImp(BASE_face_RF, scale = T) # importância de cada variável
+varImpPlot(BASE_face_RF, type=2) # importância de cada variável
+
+
+```
+
+
+
+## K-means
+
+
+```{r face_kmeans}
+
+ggplot() +
+  geom_point(data = face, 
+             mapping = aes(x = num_comments, 
+                           y = num_shares, 
+                           colour = cluster)) +
+  geom_point(mapping = aes_string(x = cls$centers[, "num_comments"], 
+                                  y = cls$centers[, "num_shares"]),
+             color = "red", size = 4) +
+  geom_text(mapping = aes_string(x = cls$centers[, "num_comments"], 
+                                 y = cls$centers[, "num_shares"],
+                                 label = 1:4),
+            color = "black", size = 4) +
+  theme_light()
+
+
+```
+
+
+
+## Prescrição
+
+
+### Post com mais interações positivas
+
+Descrição : Em analise dos números de comentários, temos Com maior indíce : Video e Fotos 
+
+Descrição : Em analise dos números de Likes, temos Com maior indíce : Foto e Vídeo
+
+
+
+### Post com mais interações negativas    
+
+Descrição : Em analise dos números de comentários, temos Com menor indíce : link e Status 
+
+Descrição : Em analise dos números de Likes, temos Com menor indíce : link e Status 
