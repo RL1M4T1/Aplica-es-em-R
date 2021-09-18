@@ -111,3 +111,5 @@ Descrição : Em analise dos números de Likes, temos Com maior indíce : Foto e
 Descrição : Em analise dos números de comentários, temos Com menor indíce : link e Status 
 
 Descrição : Em analise dos números de Likes, temos Com menor indíce : link e Status 
+
+Observação : Temos a tendência de melhoramento dos link para não termos dislike.
