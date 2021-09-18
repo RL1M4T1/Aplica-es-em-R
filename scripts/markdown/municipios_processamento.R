@@ -13,4 +13,8 @@ mun_pe$municipio <- as.factor(mun_pe$municipio)
 
 mun_pe_meta <- read.csv2('https://raw.githubusercontent.com/hugoavmedeiros/cd_com_r/master/bases_tratadas/clusters_municipios_pe_meta.csv')
 
+
+mun_pe_meta$indicador <- as.factor(mun_pe_meta$indicador)
+
 # mun_pe_meta <- read.csv2('bases_tratadas/clusters_municipios_pe_meta.csv')
+

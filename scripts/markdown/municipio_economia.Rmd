@@ -23,7 +23,7 @@ Controles {.sidebar}
 
 ```{r controle1, echo=FALSE, warning=FALSE, message=FALSE}
 radioButtons(inputId = 'radio1', 'Selecione a RD', c('PERNAMBUCO', unique(levels(mun_pe$rd))), inline = F)
-radioButtons(inputId = 'radio5', 'Escolha os indicadores', unique(mun_pe_meta$indicador), inline = F)
+
 ```
 
 Row
@@ -45,7 +45,6 @@ renderPlot({
     m <- mun_pe %>% filter(rd == input$radio1) ## dinâmica
     
     plot_num(m[ , c(4:6, 10:14) ] )
-    
     
     
   }
