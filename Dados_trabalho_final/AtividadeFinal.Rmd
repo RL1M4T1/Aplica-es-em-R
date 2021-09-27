@@ -1,0 +1,237 @@
+---
+title: "Municípios de Pernambuco"
+output:
+    flexdashboard::flex_dashboard:
+    orientation: rows
+    theme: lumen
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+pacman::p_load(caret, corrplot, dplyr, DT, flexdashboard, funModeling, lubridate, plotly, shiny, zoo)
+pacman::p_load(caret, dplyr, forcats, funModeling,cluster, factoextra, ggplot2, plotly)# carregar pacotes
+
+#base <- read.csv2('C:/Users/pedro/OneDrive/Área de Trabalho/Pós/teste/atividade_final.csv')
+base <- read.csv2('https://raw.githubusercontent.com/pedroigoor/Bases/main/atividade_final.csv')
+baseM <- read.csv2('https://raw.githubusercontent.com/pedroigoor/Bases/main/atividade_final_metadados.csv')
+
+base_cluster <- base[ , (1:5)]
+fviz_nbclust(base_cluster, kmeans, method = "wss")
+
+
+# Agrupamento com kmeans
+cls <- kmeans(base_cluster, centers = 4) # aprendizagem ns
+base_cluster$cluster <- as.factor(cls$cluster) # passamos os clusters para a base original
+```
+
+Painel de Indicadores {data-icon="fa-chart-line" data-orientation=rows}
+===================================== 
+
+Controles {.sidebar}
+-------------------------------------
+
+```{r controle1, echo=FALSE, warning=FALSE, message=FALSE}
+#radioButtons(inputId = 'radioA1', 'Selecione a RD', c('PERNAMBUCO', unique(levels(mun_pe$rd))), inline = F)
+#checkboxGroupInput(inputId = 'radioA2', 'Selecione os Indicadores', names(mun_pe)[-c(1:3,7:9,15)], selected = c('pib', 'pop', 'vab', 'icms', 'ipi', 'ipva', 'salario_medio', #'pop_ocu_per'))
+
+
+checkboxGroupInput(inputId = 'radioA3', 'Selecione os Indicadores', names(base)[-c(6)], selected = c('STG', 'SCG', 'STR', 'LPR', 'PEG'))
+
+
+
+```
+
+Row
+-------------------------------------
+
+### Distribuição dos indicadores
+
+```{r hist, echo=FALSE, warning=FALSE, message=FALSE}
+renderPlot({
+  
+    m <- base  %>% select(input$radioA3) ## dinâmica
+    
+    plot_num(m)
+  
+  
+#  if(input$radioA1 == "PERNAMBUCO") {
+# 
+#    m <- mun_pe %>% select(input$radioA2)
+#    
+#    plot_num(m)
+#    
+#    }
+  
+#  else {
+    
+#    m <- mun_pe %>% filter(rd == input$radioA1) %>% select(input$radioA2) ## dinâmica
+    
+#    plot_num(m)
+    
+    
+   
+#  }
+  
+})
+```
+
+### Relacionamento entre os indicadores
+
+```{r cor, echo=FALSE, warning=FALSE, message=FALSE}
+renderPlot({
+  
+    m <- base %>% select(input$radioA3) ## dinâmica
+    
+    corrplot(cor(m))
+    
+  
+#  if(input$radioA1 == "PERNAMBUCO") {
+  
+#    m <- mun_pe %>% select(input$radioA2)
+#    
+#    corrplot(cor(m))
+#    
+#    }
+#  
+#  else {
+    
+#    m <- mun_pe %>% filter(rd == input$radioA1) %>% select(input$radioA2) ## dinâmica
+    
+#    corrplot(cor(m))
+    
+#  }
+  
+})
+```
+
+Agrupamento {data-icon="fa-object-group" data-orientation=rows}
+===================================== 
+
+Inputs {.sidebar}
+-----------------------------------------------------------------------
+
+```{r controle2, echo=FALSE, warning=FALSE, message=FALSE}
+#radioButtons(inputId = 'radioB1', 'Selecione a RD', c('PERNAMBUCO', unique(levels(mun_pe$rd))), inline = F)
+
+radioButtons(inputId = 'radioB2', 'Escolha o Total de Grupos', 1:6, inline = T)
+
+radioButtons(inputId = 'radioX1', 'Selecione os Indicadores',  names(base)[-c(6)], inline = F)
+radioButtons(inputId = 'radioY1', 'Selecione os Indicadores', names(base)[-c(6)], inline = F)
+
+names(base)[-c(6)]
+```
+
+Row
+-------------------------------------
+
+### Agrupamento 
+
+```{r cluster, echo=FALSE, warning=FALSE, message=FALSE}
+renderPlotly({
+  
+    m <- base[ , (1:5)] ## dinâmica
+    
+    cls <- kmeans(x = m [, c(1:5)], centers = input$radioB2) ## dinâmica
+    
+    m$cluster <- as.factor(cls$cluster)
+  
+    x_axis <- input$radioX1
+    y_axis <- input$radioY1
+    
+ ggplot(m, aes_string(x = x_axis, y = y_axis, color = 'cluster')) +
+  geom_point(size = 4,
+             stroke = 3) +
+  theme_light()
+    
+  
+#  if(input$radioB1 == "PERNAMBUCO") {
+  
+#    cls <- kmeans(x = mun_pe [, c(4:6, 10:14)], centers = 12)
+    
+#    mun_pe$cluster <- as.factor(cls$cluster)
+    
+#    x_axis <- input$radioX1
+#    y_axis <- input$radioY1
+    
+#  ggplot(mun_pe, aes_string(x = x_axis, y = y_axis, color = "cluster")) +
+#  geom_point(size = 4,
+#             stroke = 3) +
+#  theme_light()
+  
+#    }
+  
+#  else {
+    
+#    m <- mun_pe %>% filter(rd == input$radioB1) ## dinâmica
+    
+#    cls <- kmeans(x = m [, c(4:6, 10:14)], centers = input$radioB2) ## dinâmica
+    
+#    m$cluster <- as.factor(cls$cluster)
+    
+#    x_axis <- input$radioX1
+#    y_axis <- input$radioY1
+    
+# ggplot(m, aes_string(x = x_axis, y = y_axis, color = 'cluster')) +
+#  geom_point(size = 4,
+#             stroke = 3) +
+#  theme_light()
+    
+#  }
+  
+})
+```
+
+Predição {data-icon="fa-diagnoses" data-orientation=rows}
+=====================================
+
+Controles {.sidebar}
+-------------------------------------
+
+```{r controle3, echo=FALSE, warning=FALSE, message=FALSE}
+#radioButtons(inputId = 'testex1', 'Selecione os Indicadores',  names(base)[-c(6)], inline = F)
+#radioButtons(inputId = 'labelX2', 'Selecione os Indicadores', names(base)[-c(6)], inline = F)
+
+
+
+numericInput('numC1', 'PEG', min(base$PEG), step = 100000)
+numericInput('numC2', 'LPR', min(base$LPR), step = 0.1)
+```
+
+What-if?
+
+O que acontece com nivel de conhecimento se o PEG ou LPR  forem modificados?
+
+Row
+-------------------------------------
+
+### Impacto dos Indicadores
+
+```{r pred1, echo=FALSE, warning=FALSE, message=FALSE}
+train.control <- trainControl(method = "cv", number = 10)
+mun_LM <- train(UNS ~ PEG + LPR, data = base, method = "lm", trControl = train.control)
+summary(mun_LM)
+```
+
+### Predição do Nivel do conhecimento
+
+```{r pred2, echo=FALSE, warning=FALSE, message=FALSE}
+renderPrint({
+predict(mun_LM, data.frame(PEG = as.numeric(input$numC1), LPR = input$numC2))
+  
+})
+```
+
+Metadados {data-icon="fa-info" data-orientation=rows}
+=====================================
+
+Row
+-------------------------------------
+
+### Qualidade dos dados
+
+```{r quali, echo=FALSE, warning=FALSE, message=FALSE}
+knitr::kable(status(base))
+```
+
+Veja abaixo a tabela com as informações detalhadas dos indicadores <br> `r knitr::kable(baseM) # inline` 
